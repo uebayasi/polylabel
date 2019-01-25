@@ -127,10 +127,10 @@ splitCell polygon cell =
 
 
 data Cell = Cell
-    { _o   :: V2 Double -- center
-    , _h   :: Double
-    , _d   :: Double
-    , _max :: Double
+    { _o       :: V2 Double -- center
+    , _h       :: Double
+    , _d       :: Double
+    , _max     :: Double
     , _longest :: Double
     }
     deriving (Show)
