@@ -18,6 +18,14 @@ type Shape = [V2 Double]
 type Polygon = [Shape]
 
 
+type Cache = Map.Map (Polygon, Double) (V2 Double)
+
+
+emptyCache :: Cache
+emptyCache = Map.empty
+
+
+
 -- XXX Determine the best point instead of returning multiple candidates
 -- XXX - For each point, calc the distances to shape segments, and pick up the longest distance
 -- XXX - Compare the longest distances of solved cells, and pick up a cell with the shortest distance
