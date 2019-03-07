@@ -26,6 +26,21 @@ emptyCache = Map.empty
 
 
 
+polyLabelCached :: Polygon -> Double -> Cache -> (V2 Double, Cache)
+polyLabelCached polygon precision cache =
+    case Map.lookup (polygon, precision) cache of
+        Nothing ->
+            let
+                res = polyLabel polygon precision
+                cache' = Map.insert (polygon, precision) res cache
+            in
+                trace "!"
+                (res, cache')
+        Just res ->
+            trace "@"
+            (res, cache)
+
+
 -- XXX Determine the best point instead of returning multiple candidates
 -- XXX - For each point, calc the distances to shape segments, and pick up the longest distance
 -- XXX - Compare the longest distances of solved cells, and pick up a cell with the shortest distance
