@@ -27,6 +27,8 @@ emptyCache = Map.empty
 
 
 polyLabelCached :: Polygon -> Double -> Cache -> (V2 Double, Cache)
+polyLabelCached [] _ cache =
+    (V2 0 0, cache)
 polyLabelCached polygon precision cache =
     case Map.lookup (polygon, precision) cache of
         Nothing ->
@@ -45,7 +47,10 @@ polyLabelCached polygon precision cache =
 -- XXX - For each point, calc the distances to shape segments, and pick up the longest distance
 -- XXX - Compare the longest distances of solved cells, and pick up a cell with the shortest distance
 polyLabel :: Polygon -> Double -> V2 Double
-polyLabel polygon precision =
+polyLabel polygon precision
+  | polygon == [] = V2 0 0
+  | head polygon == [] = V2 0 0
+  | otherwise =
     let
         precision' = if precision == 0 then 1.0 else precision
         shape = head polygon
@@ -60,9 +65,9 @@ polyLabel polygon precision =
         solvedCells = solveCells polygon precision' (_d bestCell) $
             bestCell : cells
     in
-        --trace ("cells: " ++ show cells) $
-        --trace ("bestCell: " ++ show bestCell) $
-        --trace ("solvedCells: " ++ show solvedCells) $
+        -- trace ("cells: " ++ show cells) $
+        -- trace ("bestCell: " ++ show bestCell) $
+        -- trace ("solvedCells: " ++ show solvedCells) $
         -- head $ map _o solvedCells
         _o $ head $ sortByLongest solvedCells
 
@@ -70,7 +75,9 @@ polyLabel polygon precision =
 getCells :: Polygon -> ((Double, Double, Double, Double), [Cell])
 getCells polygon =
     let
-        shape = head polygon
+        shape =
+            -- trace ("getCells: shape: " ++ show (head polygon)) $
+            head polygon
         (minX, minY, maxX, maxY) =
             let xs = map (^._x) shape
                 ys = map (^._y) shape
@@ -89,7 +96,7 @@ getCells polygon =
             y <- [y | y <- map ((+ minY) . (* size) . fromIntegral) [0 .. j], y < maxY]
             return $ makeCell (V2 (x + h) (y + h)) h polygon
     in
-        --trace ("cells: " ++ show cells) $
+        -- trace ("cells: " ++ show cells) $
         ((minX, minY, maxX, maxY), cells)
 
 
@@ -104,7 +111,7 @@ solveCells :: Polygon -> Double -> Double -> [Cell] -> [Cell]
 solveCells polygon precision bestDist cells =
     let
         (bestDist', cells') =
-            --trace ("solveCells': " ++ show cells) $
+            -- trace ("solveCells': " ++ show cells) $
             filterCells precision bestDist cells
     in
         if null cells' then
@@ -113,9 +120,9 @@ solveCells polygon precision bestDist cells =
             let
                 cells'' = concatMap (splitCell polygon) cells'
             in
-                --trace ("bestDist': " ++ show bestDist') $
-                --trace ("cells': " ++ show cells') $
-                --trace ("cells'': " ++ show cells'') $
+                -- trace ("bestDist': " ++ show bestDist') $
+                -- trace ("cells': " ++ show cells') $
+                -- trace ("cells'': " ++ show cells'') $
                 solveCells polygon precision bestDist' cells''
 
 
@@ -126,9 +133,9 @@ filterCells precision bestDist cells =
         bestDist' = maximum $ map _d cells'
         cells'' = filter (\cell -> _max cell > bestDist' + precision) cells'
     in
-        --trace ("cells': " ++ show cells') $
-        --trace ("bestDist': " ++ show bestDist') $
-        --trace ("cells'': " ++ show cells'') $
+        -- trace ("cells': " ++ show cells') $
+        -- trace ("bestDist': " ++ show bestDist') $
+        -- trace ("cells'': " ++ show cells'') $
         (bestDist', cells'')
 
 
@@ -212,10 +219,10 @@ pointToShapeDist o@(V2 ox oy) shape =
         mindist = minimum dists
         maxdist = maximum dists
     in
-        --trace ("pqs: " ++ show pqs) $
-        --trace ("xs: " ++ show xs) $
-        --trace ("sign: " ++ show sign) $
-        --trace ("mindist: " ++ show mindist) $
+        -- trace ("pqs: " ++ show pqs) $
+        -- trace ("xs: " ++ show xs) $
+        -- trace ("sign: " ++ show sign) $
+        -- trace ("mindist: " ++ show mindist) $
         (sign * sqrt mindist, sign * sqrt maxdist)
 
 
@@ -262,9 +269,9 @@ getCentroid polygon =
         V2 x y = foldr ((+) . fst) (V2 0 0) fs
         area = sum $ map snd fs
     in
-        --trace ("pqs: " ++ show pqs) $
-        --trace ("fs: " ++ show fs) $
-        --trace ("area: " ++ show area) $
+        -- trace ("pqs: " ++ show pqs) $
+        -- trace ("fs: " ++ show fs) $
+        -- trace ("area: " ++ show area) $
         if area == 0
             then let V2 hx hy = head shape in makeCell (V2 hx hy) 0 polygon
             else makeCell (V2 (x / area) (y / area)) 0 polygon
