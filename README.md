@@ -1,4 +1,4 @@
-# polylabel - Haskell PolyLabel implementation
+# polylabel - A Haskell implementation of PolyLabel
 
 See [1] about PolyLabel.
 
