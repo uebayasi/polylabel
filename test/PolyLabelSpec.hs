@@ -127,7 +127,7 @@ spec = before_ hoge $ do
     describe "polyLabel" $
         it "polyLabel" $
             let
-                (V2 ox oy) = polyLabel testPolygon 0.001
+                (V2 ox oy, _) = polyLabel testPolygon 0.001
                 (x, y) = (0.58, 1.41)
             in
                 --trace ("points: " ++ show points) $

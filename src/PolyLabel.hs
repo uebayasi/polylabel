@@ -18,7 +18,7 @@ type Shape = [V2 Double]
 type Polygon = [Shape]
 
 
-type Cache = Map.Map (Polygon, Double) (V2 Double)
+type Cache = Map.Map (Polygon, Double) (V2 Double, Double)
 
 
 emptyCache :: Cache
@@ -26,9 +26,9 @@ emptyCache = Map.empty
 
 
 
-polyLabelCached :: Polygon -> Double -> Cache -> (V2 Double, Cache)
+polyLabelCached :: Polygon -> Double -> Cache -> ((V2 Double, Double), Cache)
 polyLabelCached [] _ cache =
-    (V2 0 0, cache)
+    ((V2 0 0, 0), cache)
 polyLabelCached polygon precision cache =
     case Map.lookup (polygon, precision) cache of
         Nothing ->
@@ -46,10 +46,10 @@ polyLabelCached polygon precision cache =
 -- XXX Determine the best point instead of returning multiple candidates
 -- XXX - For each point, calc the distances to shape segments, and pick up the longest distance
 -- XXX - Compare the longest distances of solved cells, and pick up a cell with the shortest distance
-polyLabel :: Polygon -> Double -> V2 Double
+polyLabel :: Polygon -> Double -> (V2 Double, Double)
 polyLabel polygon precision
-  | polygon == [] = V2 0 0
-  | head polygon == [] = V2 0 0
+  | polygon == [] = (V2 0 0, 0)
+  | head polygon == [] = (V2 0 0, 0)
   | otherwise =
     let
         precision' = if precision == 0 then 1.0 else precision
@@ -64,12 +64,14 @@ polyLabel polygon precision
 
         solvedCells = solveCells polygon precision' (_d bestCell) $
             bestCell : cells
+
+        res = head $ sortByLongest solvedCells
     in
         -- trace ("cells: " ++ show cells) $
         -- trace ("bestCell: " ++ show bestCell) $
         -- trace ("solvedCells: " ++ show solvedCells) $
         -- head $ map _o solvedCells
-        _o $ head $ sortByLongest solvedCells
+        (_o res, _d res)
 
 
 getCells :: Polygon -> ((Double, Double, Double, Double), [Cell])
